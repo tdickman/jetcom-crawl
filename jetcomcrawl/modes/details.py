@@ -30,9 +30,10 @@ class Worker(object):
             item['savings'] = round(decimal.Decimal(item['savings']), 2)
         for item in data['comparisons']:
             item['price'] = round(decimal.Decimal(item['price']), 2)
-        data['price_competitor'] = data['quantities'][0]['price']
-        data['price_savings'] = data['quantities'][0]['savings']
-        data['price'] = data['price_competitor'] - data['price_savings']
+        if not data['unavailable']:
+            data['price_competitor'] = data['quantities'][0]['price']
+            data['price_savings'] = data['quantities'][0]['savings']
+            data['price'] = data['price_competitor'] - data['price_savings']
         data['jid'] = jid
         return data
 
@@ -51,6 +52,7 @@ class Worker(object):
                 'x-csrf-token': csrf,
                 'x-requested-with': 'XMLHttpRequest'
             })
+            logging.info(resp.text)
             data = self._process_data(product['uid'], resp.json())
             logging.info(data)
             self.table.insert(data)
