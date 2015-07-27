@@ -19,13 +19,17 @@ class Worker(object):
             page = data['page']
             logging.info('Finding products for category {}, page {}'.format(cid, page))
             html = browser.get('https://jet.com/search/results?category={}&page={}'.format(cid, page))
-            soup = BeautifulSoup(html.text, 'html.parser')
+            try:
+                soup = BeautifulSoup(html.text, 'html.parser')
 
-            results = []
-            for item in soup.find('div', {'class': 'products'}).findAll('div', {'class': 'product mobile'}):
-                url = item.a['href']
-                uid = url.split('/')[-1]
-                results.append({'uid': uid, 'url': url})
+                results = []
+                for item in soup.find('div', {'class': 'products'}).findAll('div', {'class': 'product mobile'}):
+                    url = item.a['href']
+                    uid = url.split('/')[-1]
+                    results.append({'uid': uid, 'url': url})
+            except:
+                logging.info(html.text)
+                raise
 
             logging.info('{} products found for category {}, page {}, inserting into sqs'.format(len(results), cid, page))
             self.queue_items.insert_bulk(results)
