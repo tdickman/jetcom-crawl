@@ -13,3 +13,6 @@ class Table(object):
     def insert(self, data):
         '''TODO: Batch these requests'''
         self.table.put_item(data=data, overwrite=True)
+
+    def get_item(self, **kwargs):
+        self.table.get_item(**kwargs)

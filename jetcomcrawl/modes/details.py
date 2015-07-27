@@ -3,6 +3,7 @@ import json
 import datetime
 import decimal
 from retrying import retry
+import boto.dynamodb2.exceptions
 
 from jetcomcrawl import browser
 import jetcomcrawl.libs.queue
@@ -71,11 +72,15 @@ class Worker(object):
     def work(self):
         '''Keeps running indefinitely, retrieving jobs from sqs'''
         while True:
-            product = self.queue_items.retrieve()
-            logging.info('Beginning to retrieve data for {}:{}'.format(product['uid'], product['url']))
-            resp = self._get_everything(product)
-            logging.info(resp.text)
-            data = self._process_data(product['uid'], resp.json())
-            logging.info(data)
-            self.table.insert(data)
+            try:
+                product = self.queue_items.retrieve()
+                if self.table.get_item(jid=product['uid']):
+                    logging.info('{} already exists, skipping'.format(product['uid']))
+            except boto.dynamodb2.exceptions.ItemNotFound:
+                logging.info('Beginning to retrieve data for {}:{}'.format(product['uid'], product['url']))
+                resp = self._get_everything(product)
+                logging.info(resp.text)
+                data = self._process_data(product['uid'], resp.json())
+                logging.info(data)
+                self.table.insert(data)
             self.queue_items.remove_processed()
