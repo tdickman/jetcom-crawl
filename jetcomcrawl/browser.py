@@ -12,7 +12,7 @@ DELAY = 5
 def get(url):
     delay()
     headers = {'user-agent': USER_AGENT}
-    return requests.get(url, headers=headers)
+    return requests.get(url, headers=headers, timeout=30)
 
 
 def delay():
@@ -27,9 +27,9 @@ class Session(object):
     @retry(stop_max_attempt_number=5, wait_exponential_multiplier=2000, wait_exponential_max=20000)
     def get(self, url):
         delay()
-        return self.s.get(url)
+        return self.s.get(url, timeout=30)
 
     @retry(stop_max_attempt_number=5, wait_exponential_multiplier=2000, wait_exponential_max=20000)
     def post(self, url, post_data, headers={}):
         delay()
-        return self.s.post(url, data=post_data, headers=headers)
+        return self.s.post(url, data=post_data, headers=headers, timeout=30)
