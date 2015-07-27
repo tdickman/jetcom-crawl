@@ -12,6 +12,9 @@ class Worker(object):
     def _get_max_page(self, cid):
         html = browser.get('https://jet.com/search/results?category={}&page={}'.format(cid, 1))
         soup = BeautifulSoup(html.text, 'html.parser')
+        # Single page
+        if not soup.find('div', {'class': 'pagination'}):
+            return 1
         pages = [int(a['href'].split('page=')[1]) for a in soup.find('div', {'class': 'pagination'}).findAll('a')]
         return max(pages)
 
@@ -29,10 +32,10 @@ class Worker(object):
 
         logging.info('Beginning inserting {} category ids * ?? pages into sqs'.format(len(category_ids)))
 
-        for cid in category_ids:
-            logging.info('Beginning inserting pages for category id {}'.format(cid))
+        for i, cid in enumerate(category_ids):
+            logging.info('{}/{}: Beginning inserting pages for category id {}'.format(i, len(category_ids), cid))
             pages = [{'cid': cid, 'page': page} for page in range(1, self._get_max_page(cid))]
             self.queue.insert_bulk(list(pages))
-            logging.info('Completed inserting {} pages for category id {}'.format(len(pages), cid))
+            logging.info('{}/{}: Completed inserting {} pages for category id {}'.format(i, len(category_ids), len(pages), cid))
 
         logging.info('Completed inserting {} category ids into sqs'.format(len(category_ids)))
