@@ -11,4 +11,5 @@ class Table(object):
         self.table = boto.dynamodb2.table.Table(settings['dynamodb_table'], connection=conn)
 
     def insert(self, data):
+        '''TODO: Batch these requests'''
         self.table.put_item(data=data, overwrite=True)
