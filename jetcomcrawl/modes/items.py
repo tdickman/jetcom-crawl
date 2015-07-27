@@ -22,11 +22,14 @@ class Worker(object):
             try:
                 soup = BeautifulSoup(html.text, 'html.parser')
 
-                results = []
-                for item in soup.find('div', {'class': 'products'}).findAll('div', {'class': 'product mobile'}):
-                    url = item.a['href']
-                    uid = url.split('/')[-1]
-                    results.append({'uid': uid, 'url': url})
+                if soup.find('div', {'class': 'no-results'}):
+                    logging.info('Skipping process of {}:{}. No results available'.format(cid, page))
+                else:
+                    results = []
+                    for item in soup.find('div', {'class': 'products'}).findAll('div', {'class': 'product mobile'}):
+                        url = item.a['href']
+                        uid = url.split('/')[-1]
+                        results.append({'uid': uid, 'url': url})
             except:
                 logging.info(html.text)
                 raise
