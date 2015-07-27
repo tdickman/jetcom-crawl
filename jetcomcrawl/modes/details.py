@@ -8,10 +8,14 @@ import jetcomcrawl.libs.queue
 import jetcomcrawl.libs.dynamodb
 
 
+CSRF_REFRESH_INTERVAL = 10
+
+
 class Worker(object):
     def __init__(self):
         self.queue_items = jetcomcrawl.libs.queue.Queue('queue_items', batch_size=10, processing_timeout=5*60)
         self.table = jetcomcrawl.libs.dynamodb.Table()
+        self.csrf_count = 0
 
     def _get_max_page(self, soup):
         pages = [int(a['href'].split('page=')[1]) for a in soup.find('div', {'class': 'pagination'}).findAll('a')]
@@ -37,14 +41,22 @@ class Worker(object):
         data['jid'] = jid
         return data
 
+    def _get_csrf(self, url):
+        if self.csrf_count < 1:
+            self.session = browser.Session()
+            resp = self.session.get('https://jet.com{}'.format(url))
+            self.csrf = resp.text.split('__csrf":"')[1].split('",')[0]
+            self.csrf_count = CSRF_REFRESH_INTERVAL - 1
+            logging.info('Retrieving new csrf token')
+        self.csrf_count -= 1
+        return (self.session, self.csrf)
+
     def work(self):
         '''Keeps running indefinitely, retrieving jobs from sqs'''
         while True:
             product = self.queue_items.retrieve()
-            session = browser.Session()
             logging.info('Beginning to retrieve data for {}:{}'.format(product['uid'], product['url']))
-            resp = session.get('https://jet.com{}'.format(product['url']))
-            csrf = resp.text.split('__csrf":"')[1].split('",')[0]
+            (session, csrf) = self._get_csrf(product['url'])
             resp = session.post('https://jet.com/api/product/price', json.dumps({'sku': product['uid']}), headers={
                 'referer': product['url'],
                 'content-type': 'application/json',

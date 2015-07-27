@@ -2,6 +2,7 @@ import requests
 import time
 import random
 from retrying import retry
+import logging
 
 from jetcomcrawl.libs import common
 
@@ -20,7 +21,9 @@ def get(url):
 
 
 def delay():
-    time.sleep(random.uniform(0, DELAY))
+    val = random.uniform(0, DELAY)
+    logging.info('Sleeping {}s'.format(val))
+    time.sleep(val)
 
 
 class Session(object):
