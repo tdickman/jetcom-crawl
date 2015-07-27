@@ -41,6 +41,7 @@ class Worker(object):
         while True:
             product = self.queue_items.retrieve()
             session = browser.Session()
+            logging.info('Beginning to retrieve data for {}:{}'.format(product['uid'], product['url']))
             resp = session.get('https://jet.com{}'.format(product['url']))
             csrf = resp.text.split('__csrf":"')[1].split('",')[0]
             resp = session.post('https://jet.com/api/product/price', json.dumps({'sku': product['uid']}), headers={
