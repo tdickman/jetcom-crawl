@@ -17,13 +17,13 @@ class Worker(object):
     def work(self):
         '''Keeps running indefinitely, retrieving jobs from sqs'''
         while True:
+            # TODO: Handle no items left in queue
             cid = self.queue_categories.retrieve()
-            # TODO: Paginate here
             max_page = 1
             page = 1
             while page <= max_page:
                 html = browser.get('https://jet.com/search/results?category=6000099&page=1'.format(cid, page))
-                soup = BeautifulSoup(html, 'html.parser')
+                soup = BeautifulSoup(html.text, 'html.parser')
                 max_page = self._get_max_page(soup)
 
                 results = []
@@ -35,3 +35,4 @@ class Worker(object):
                 logging.info('{} products found for category {}, page {}/{}, inserting into sqs'.format(len(results), cid, page, max_page))
                 self.queue_items.insert_bulk(results)
                 page += 1
+            self.queue_categories.remove_processed()

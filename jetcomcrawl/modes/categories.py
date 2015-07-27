@@ -12,7 +12,7 @@ class Worker(object):
     def crawl(self):
         # Retrieve a list of categories to crawl, and throw these into sqs
         page = browser.get('https://jet.com/categories')
-        soup = BeautifulSoup(page, 'html.parser')
+        soup = BeautifulSoup(page.text, 'html.parser')
 
         # Construct a set of unique category ids
         category_ids = set()
@@ -23,7 +23,6 @@ class Worker(object):
 
         logging.info('Beginning inserting {} category ids into sqs'.format(len(category_ids)))
 
-        for category_id in category_ids:
-            self.queue.insert(category_id)
+        self.queue.insert_bulk(list(category_ids))
 
         logging.info('Completed inserting {} category ids into sqs'.format(len(category_ids)))

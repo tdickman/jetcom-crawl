@@ -1,7 +1,7 @@
 import sys
 import logging
 
-from jetcomcrawl.modes import categories, items
+from jetcomcrawl.modes import categories, items, details
 
 
 if __name__ == '__main__':
@@ -17,4 +17,5 @@ if __name__ == '__main__':
         worker = items.Worker()
         worker.work()
     elif mode == 'get_details':
-        pass
+        worker = details.Worker()
+        worker.work()
