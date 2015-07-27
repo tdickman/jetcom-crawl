@@ -3,9 +3,11 @@ import time
 import random
 from retrying import retry
 
+from jetcomcrawl.libs import common
+
 
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36'
-DELAY = 5
+DELAY = common.get_settings()['request_delay']
 
 
 @retry(stop_max_attempt_number=5, wait_exponential_multiplier=2000, wait_exponential_max=20000)
@@ -16,7 +18,7 @@ def get(url):
 
 
 def delay():
-    time.sleep(random.uniform(0, 5))
+    time.sleep(random.uniform(0, DELAY))
 
 
 class Session(object):
