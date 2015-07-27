@@ -1,5 +1,5 @@
 {
     "region": "us-west-2",
-    "queue_category_crawl": "jetscom_categories",
-    "queue_item_crawl": "jetscom_items"
+    "queue_categories": "jetscom_categories",
+    "queue_items": "jetscom_items"
 }
