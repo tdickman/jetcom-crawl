@@ -27,11 +27,12 @@ class Worker(object):
                 category_id = link['href'].split('category=')[1].split('&')[0]
                 category_ids.add(category_id)
 
-        logging.info('Beginning inserting {} category ids into sqs'.format(len(category_ids)))
+        logging.info('Beginning inserting {} category ids * ?? pages into sqs'.format(len(category_ids)))
 
         for cid in category_ids:
+            logging.info('Beginning inserting pages for category id {}'.format(cid))
             pages = [{'cid': cid, 'page': page} for page in range(1, self._get_max_page(cid))]
             self.queue.insert_bulk(list(pages))
-            logging.info('Inserted {} pages for category id {}'.format(len(pages), cid))
+            logging.info('Completed inserting {} pages for category id {}'.format(len(pages), cid))
 
         logging.info('Completed inserting {} category ids into sqs'.format(len(category_ids)))
