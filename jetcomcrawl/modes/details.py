@@ -2,6 +2,7 @@ import logging
 import json
 import datetime
 import decimal
+from retrying import retry
 
 from jetcomcrawl import browser
 import jetcomcrawl.libs.queue
@@ -51,11 +52,9 @@ class Worker(object):
         self.csrf_count -= 1
         return (self.session, self.csrf)
 
-    def work(self):
-        '''Keeps running indefinitely, retrieving jobs from sqs'''
-        while True:
-            product = self.queue_items.retrieve()
-            logging.info('Beginning to retrieve data for {}:{}'.format(product['uid'], product['url']))
+    @retry(stop_max_attempt_number=5, wait_exponential_multiplier=2000, wait_exponential_max=20000)
+    def _get_everything(self, product):
+        try:
             (session, csrf) = self._get_csrf(product['url'])
             resp = session.post('https://jet.com/api/product/price', json.dumps({'sku': product['uid']}), headers={
                 'referer': product['url'],
@@ -64,6 +63,17 @@ class Worker(object):
                 'x-csrf-token': csrf,
                 'x-requested-with': 'XMLHttpRequest'
             })
+        except:
+            self.csrf_count = 0
+            raise
+        return resp
+
+    def work(self):
+        '''Keeps running indefinitely, retrieving jobs from sqs'''
+        while True:
+            product = self.queue_items.retrieve()
+            logging.info('Beginning to retrieve data for {}:{}'.format(product['uid'], product['url']))
+            resp = self._get_everything(product)
             logging.info(resp.text)
             data = self._process_data(product['uid'], resp.json())
             logging.info(data)
