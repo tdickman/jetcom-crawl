@@ -10,29 +10,24 @@ class Worker(object):
         self.queue_categories = jetcomcrawl.libs.queue.Queue('queue_categories')
         self.queue_items = jetcomcrawl.libs.queue.Queue('queue_items')
 
-    def _get_max_page(self, soup):
-        pages = [int(a['href'].split('page=')[1]) for a in soup.find('div', {'class': 'pagination'}).findAll('a')]
-        return max(pages)
-
     def work(self):
         '''Keeps running indefinitely, retrieving jobs from sqs'''
         while True:
             # TODO: Handle no items left in queue
-            cid = self.queue_categories.retrieve()
-            max_page = 1
-            page = 1
-            while page <= max_page:
-                html = browser.get('https://jet.com/search/results?category=6000099&page=1'.format(cid, page))
-                soup = BeautifulSoup(html.text, 'html.parser')
-                max_page = self._get_max_page(soup)
+            data = self.queue_categories.retrieve()
+            cid = data['cid']
+            page = data['page']
+            logging.info('Finding products for category {}, page {}'.format(cid, page))
+            html = browser.get('https://jet.com/search/results?category={}&page={}'.format(cid, page))
+            soup = BeautifulSoup(html.text, 'html.parser')
 
-                results = []
-                for item in soup.find('div', {'class': 'products'}).findAll('div', {'class': 'product mobile'}):
-                    url = item.a['href']
-                    uid = url.split('/')[-1]
-                    results.append({'uid': uid, 'url': url})
+            results = []
+            for item in soup.find('div', {'class': 'products'}).findAll('div', {'class': 'product mobile'}):
+                url = item.a['href']
+                uid = url.split('/')[-1]
+                results.append({'uid': uid, 'url': url})
 
-                logging.info('{} products found for category {}, page {}/{}, inserting into sqs'.format(len(results), cid, page, max_page))
-                self.queue_items.insert_bulk(results)
-                page += 1
+            logging.info('{} products found for category {}, page {}, inserting into sqs'.format(len(results), cid, page))
+            self.queue_items.insert_bulk(results)
+
             self.queue_categories.remove_processed()
