@@ -10,7 +10,7 @@ import jetcomcrawl.libs.dynamodb
 
 class Worker(object):
     def __init__(self):
-        self.queue_items = jetcomcrawl.libs.queue.Queue('queue_items', batch_size=10, processing_timeout=60)
+        self.queue_items = jetcomcrawl.libs.queue.Queue('queue_items', batch_size=10, processing_timeout=5*60)
         self.table = jetcomcrawl.libs.dynamodb.Table()
 
     def _get_max_page(self, soup):
