@@ -14,7 +14,9 @@ DELAY = common.get_settings()['request_delay']
 def get(url):
     delay()
     headers = {'user-agent': USER_AGENT}
-    return requests.get(url, headers=headers, timeout=30)
+    resp = requests.get(url, headers=headers, timeout=30)
+    assert resp.status_code == 200
+    return resp
 
 
 def delay():
@@ -29,9 +31,13 @@ class Session(object):
     @retry(stop_max_attempt_number=5, wait_exponential_multiplier=2000, wait_exponential_max=20000)
     def get(self, url):
         delay()
-        return self.s.get(url, timeout=30)
+        resp = self.s.get(url, timeout=30)
+        assert resp.status_code == 200
+        return resp
 
     @retry(stop_max_attempt_number=5, wait_exponential_multiplier=2000, wait_exponential_max=20000)
     def post(self, url, post_data, headers={}):
         delay()
-        return self.s.post(url, data=post_data, headers=headers, timeout=30)
+        resp = self.s.post(url, data=post_data, headers=headers, timeout=30)
+        assert resp.status_code == 200
+        return resp

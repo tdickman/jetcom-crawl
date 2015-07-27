@@ -3,5 +3,5 @@
     "queue_categories": "jetscom_categories",
     "queue_items": "jetscom_items",
     "dynamodb_table": "jetcom",
-    "request_delay": 5
+    "request_delay": 10
 }
