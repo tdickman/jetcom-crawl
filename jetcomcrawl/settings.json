@@ -1,5 +1,6 @@
 {
     "region": "us-west-2",
     "queue_categories": "jetscom_categories",
-    "queue_items": "jetscom_items"
+    "queue_items": "jetscom_items",
+    "dynamodb_table": "jetcom"
 }

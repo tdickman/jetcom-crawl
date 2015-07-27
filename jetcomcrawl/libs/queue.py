@@ -11,8 +11,8 @@ def chunker(seq, size):
 
 class Queue(object):
     def __init__(self, sqs_queue, batch_size=1, processing_timeout=30):
-        self.batch_size = batch_size
         settings = common.get_settings()
+        self.batch_size = batch_size
         conn = boto.sqs.connect_to_region(settings['region'])
         self.queue = conn.create_queue(settings[sqs_queue], 30)
         self.queue.set_message_class(boto.sqs.message.RawMessage)
