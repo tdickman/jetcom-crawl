@@ -1,5 +1,5 @@
 import sys
-import modes.master
+import modes.categories
 import logging
 
 
@@ -16,5 +16,5 @@ if __name__ == '__main__':
     elif mode == 'get_items':
         # Run worker
         pass
-    elif mode == 'get_details":
+    elif mode == 'get_details':
         pass
