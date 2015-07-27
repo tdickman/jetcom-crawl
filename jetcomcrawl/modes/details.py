@@ -15,7 +15,7 @@ CSRF_REFRESH_INTERVAL = 10
 
 class Worker(object):
     def __init__(self):
-        self.queue_items = jetcomcrawl.libs.queue.Queue('queue_items', batch_size=10, processing_timeout=5*60)
+        self.queue_items = jetcomcrawl.libs.queue.Queue('queue_items', batch_size=10)
         self.table = jetcomcrawl.libs.dynamodb.Table()
         self.csrf_count = 0
 

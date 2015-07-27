@@ -10,11 +10,11 @@ def chunker(seq, size):
 
 
 class Queue(object):
-    def __init__(self, sqs_queue, batch_size=1, processing_timeout=30):
+    def __init__(self, sqs_queue, batch_size=1):
         settings = common.get_settings()
         self.batch_size = batch_size
         conn = boto.sqs.connect_to_region(settings['region'])
-        self.queue = conn.create_queue(settings[sqs_queue], 30)
+        self.queue = conn.create_queue(settings[sqs_queue])
         self.queue.set_message_class(boto.sqs.message.RawMessage)
         self.local_cache = []
 
@@ -34,7 +34,7 @@ class Queue(object):
     def _reload_cache(self):
         logging.info('Reloading queue cache ({})'.format(self.batch_size))
         assert len(self.local_cache) == 0
-        self.local_cache = self.queue.get_messages(self.batch_size)
+        self.local_cache = self.queue.get_messages(self.batch_size, visibility_timeout=60*5)
 
     def retrieve(self):
         '''This should be called one at a time. This deletes the previous message upon retrieval'''
