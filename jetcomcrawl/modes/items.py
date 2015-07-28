@@ -22,7 +22,7 @@ class Worker(object):
             try:
                 soup = BeautifulSoup(html.text, 'html.parser')
 
-                if soup.find('div', {'class': 'no-results'}):
+                if soup.find('div', {'class': 'no_results'}):
                     logging.info('Skipping process of {}:{}. No results available'.format(cid, page))
                 else:
                     results = []
