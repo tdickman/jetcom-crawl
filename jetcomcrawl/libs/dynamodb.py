@@ -15,4 +15,4 @@ class Table(object):
         self.table.put_item(data=data, overwrite=True)
 
     def get_item(self, **kwargs):
-        self.table.get_item(**kwargs)
+        return self.table.get_item(**kwargs)
