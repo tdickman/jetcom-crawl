@@ -10,7 +10,7 @@ import jetcomcrawl.libs.queue
 import jetcomcrawl.libs.dynamodb
 
 
-CSRF_REFRESH_INTERVAL = 10
+CSRF_REFRESH_INTERVAL = 20
 
 
 class Worker(object):
