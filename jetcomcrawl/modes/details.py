@@ -77,8 +77,6 @@ class Worker(object):
                 logging.info('Procesing {}'.format(product['uid']))
                 if self.table.get_item(jid=product['uid']):
                     logging.info('{} already exists, skipping'.format(product['uid']))
-                else:
-                    raise boto.dynamodb2.exceptions.ItemNotFound('nope')
             except boto.dynamodb2.exceptions.ItemNotFound:
                 logging.info('Beginning to retrieve data for {}:{}'.format(product['uid'], product['url']))
                 resp = self._get_everything(product)
